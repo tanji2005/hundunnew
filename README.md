@@ -67,75 +67,99 @@
 
 ### 1) 数学原理说明
 
-#### 问题设定
+### 问题设定
 
-我们考虑一个常微分方程初值问题：
-$$
-\frac{d\mathbf{y}}{dt} = F(\mathbf{y}, t) = (A + B)\,\mathbf{y}, \quad \mathbf{y}(t_0) = \mathbf{y}_0
-$$
-其中 $A$ 和 $B$ 是算子（可代表线性或非线性的作用）。在本项目中，$A$ 对应“线性+耗散+外驱”部分，$B$ 对应“非线性保守（哈密顿）”部分。
+我们考虑一个常微分方程（ODE）的初值问题：
+$$\frac{d\mathbf{y}}{dt} = F(\mathbf{y}, t) = (A + B)\,\mathbf{y}, \quad \mathbf{y}(t_0) = \mathbf{y}_0$$
+其中 $A$ 和 $B$ 是算子，可以代表线性或非线性的作用。在这个项目中：
+- **算子 A** 对应“线性 + 耗散 + 外力驱动”部分。
+- **算子 B** 对应“非线性保守（哈密顿）”部分。
 
-#### 解算子（Solution Operator）
+### 解算子 (Solution Operator)
 
 从时间 $t$ 演化到 $t+h$ 的精确解算子记为 $\Phi_{h}^{A+B}$：
-$$
-\mathbf{y}(t+h) = \Phi_{h}^{A+B}(\mathbf{y}(t)) = e^{h(A+B)}\,\mathbf{y}(t)
-$$
-同理，子问题 $\dot{\mathbf{y}}=A\mathbf{y}$ 与 $\dot{\mathbf{y}}=B\mathbf{y}$ 的解算子分别为 $\Phi_{h}^{A}=e^{hA}$、$\Phi_{h}^{B}=e^{hB}$。
+$$\mathbf{y}(t+h) = \Phi_{h}^{A+B}(\mathbf{y}(t)) = e^{h(A+B)}\,\mathbf{y}(t)$$
+同理，对于子问题 $\dot{\mathbf{y}}=A\mathbf{y}$ 与 $\dot{\mathbf{y}}=B\mathbf{y}$，它们的解算子分别为 $\Phi_{h}^{A}=e^{hA}$ 和 $\Phi_{h}^{B}=e^{hB}$。
 
-#### 算子分裂法的核心思想
+### 算子分裂法的核心思想
 
-直接计算 $\Phi_{h}^{A+B}$ 通常困难；分裂法以 $\Phi_{h}^{A}$ 与 $\Phi_{h}^{B}$ 的组合来近似：
+直接计算 $\Phi_{h}^{A+B}$ 通常很困难。算子分裂法通过组合 $\Phi_{h}^{A}$ 与 $\Phi_{h}^{B}$ 来近似求解。
 
-- 一阶 Lie–Trotter 分裂：
-  $$\Phi_h^{A+B} \approx \Phi_h^A\,\Phi_h^B$$
-  局部误差 $O(h^2)$，全局误差 $O(h)$。
+- **一阶 Lie–Trotter 分裂**：
+  $$
+  \Phi_h^{A+B} \approx \Phi_h^A\,\Phi_h^B
+  $$
+  其局部截断误差为 $O(h^2)$，全局误差为 $O(h)$。
 
-- 二阶 Strang 分裂：
-  $$\Psi_h^{\mathrm{Strang}} = \Phi_{h/2}^A\,\Phi_h^B\,\Phi_{h/2}^A$$
-  即“$A$ 半步 → $B$ 整步 → $A$ 半步”。对称性是其更高精度的关键。
+- **二阶 Strang 分裂**：
+  $$
+  \Psi_h^{\mathrm{Strang}} = \Phi_{h/2}^A\,\Phi_h^B\,\Phi_{h/2}^A
+  $$
+  这个过程可以描述为“$A$ 演化半步 → $B$ 演化整步 → $A$ 演化半步”。其对称的结构是获得更高精度的关键。
 
-在本项目中：
-- $B$（非线性保守）用 Velocity-Verlet（辛）整步；
-- $A$（线性耗散+外驱）用 `solve_ivp` 的 RK45 半步；
-- 组合为 Strang：`L(h/2) → N(h) → L(h/2)`。
+在您的项目中，所采用的方案是：
+- **$B$ 部分** (非线性保守) 使用 Velocity-Verlet (一种辛积分器) 演化一个**整步** `h`。
+- **$A$ 部分** (线性耗散+外驱) 使用 `solve_ivp` 中的 RK45 方法演化一个**半步** `h/2`。
+- 最终组合成 Strang 分裂格式：`L(h/2) → N(h) → L(h/2)`。
 
-### 2) 精度阶数证明（二阶）
+### 精度阶数证明（二阶）
 
-目标：证明 Strang 分裂的局部截断误差为 $O(h^3)$，从而全局二阶。
+**目标**：证明 Strang 分裂的局部截断误差为 $O(h^3)$，从而确保其全局误差为二阶 $O(h^2)$。
 
-关键工具：BCH 公式（Baker–Campbell–Hausdorff）。对非交换算子 $X,Y$：
-$$
-e^X e^Y = e^{X+Y + \tfrac{1}{2}[X,Y] + \tfrac{1}{12}[X,[X,Y]] - \tfrac{1}{12}[Y,[X,Y]] + \cdots}
-$$
-当 $X,Y=O(h)$ 时，有（取对数）：
-$$
-\log(e^X e^Y) = X + Y + \tfrac{1}{2}[X,Y] + O(h^3)
-$$
+**关键工具**：Baker–Campbell–Hausdorff (BCH) 公式。对于两个非交换算子 $X$ 和 $Y$：
+$$e^X e^Y = e^{Z}$$
+其中 $Z$ 展开为：
+$$Z = X+Y + \frac{1}{2}[X,Y] + \frac{1}{12}[X,[X,Y]] - \frac{1}{12}[Y,[X,Y]] + \cdots$$
+当 $X$ 和 $Y$ 都是 $O(h)$ 时，取对数可得一个非常有用的近似：
+$$\log(e^X e^Y) = X + Y + \frac{1}{2}[X,Y] + O(h^3)$$
 
-证明思路：将 $\Psi_h^{\mathrm{Strang}}=e^{\frac{h}{2}A}e^{hB}e^{\frac{h}{2}A}$ 写成单一指数 $e^Z$，与精确 $e^{h(A+B)}$ 对比。
+**证明思路**：
+我们将 Strang 分裂算子 $\Psi_h^{\mathrm{Strang}}=e^{\frac{h}{2}A}e^{hB}e^{\frac{h}{2}A}$ 写成单一指数 $e^Z$ 的形式，然后将其与精确解的算子 $e^{h(A+B)}$ 进行比较。
 
-1) 先合并后两项，令 $X=hB,\ Y=\tfrac{h}{2}A$：
-$$
-\log\bigl(e^{hB} e^{\frac{h}{2}A}\bigr) = hB + \tfrac{h}{2}A + \tfrac{1}{2}[hB, \tfrac{h}{2}A] + O(h^3)
- = hB + \tfrac{h}{2}A + \tfrac{h^2}{4}[B,A] + O(h^3)
-$$
-记该结果为 $C$，即 $e^C = e^{hB} e^{\frac{h}{2}A}$。
+1.  **首先合并后两项**
+    令 $X = hB$, $Y = \frac{h}{2}A$。根据 BCH 公式：
+    $$
+    \begin{align*}
+    \log\left(e^{hB} e^{\frac{h}{2}A}\right) &= (hB) + \left(\frac{h}{2}A\right) + \frac{1}{2}\left[hB, \frac{h}{2}A\right] + O(h^3) \\
+    &= hB + \frac{h}{2}A + \frac{h^2}{4}[B,A] + O(h^3)
+    \end{align*}
+    $$
+    我们记此结果为算子 $C$，即 $e^C = e^{hB} e^{\frac{h}{2}A}$。
 
-2) 再与前一项合并：$\Psi_h^{\mathrm{Strang}}=e^{\frac{h}{2}A} e^C$，令 $X=\tfrac{h}{2}A,\ Y=C$：
-$$
-\log(\Psi_h^{\mathrm{Strang}})= \tfrac{h}{2}A + C + \tfrac{1}{2}[\tfrac{h}{2}A, C] + O(h^3)
-$$
+2.  **再与第一项合并**
+    现在我们计算 $\Psi_h^{\mathrm{Strang}}=e^{\frac{h}{2}A} e^C$。令 $X=\frac{h}{2}A$, $Y=C$：
+    $$
+    \log(\Psi_h^{\mathrm{Strang}}) = \left(\frac{h}{2}A\right) + C + \frac{1}{2}\left[\frac{h}{2}A, C\right] + O(h^3)
+    $$
 
-3) 代入 $C$ 并收集同阶项：
-- $O(h)$：$\tfrac{h}{2}A + \tfrac{h}{2}A + hB = h(A+B)$，与精确一致；
-- $O(h^2)$：来自 $\tfrac{h^2}{4}[B,A]$ 与 $\tfrac{1}{2}[\tfrac{h}{2}A,hB]=\tfrac{h^2}{4}[A,B]$，相加为 0（因 $[B,A]=-[A,B]$）。
+3.  **代入 $C$ 并按 $h$ 的幂次收集项**
+    将 $C$ 的表达式代入上式：
+    $$
+    \log(\Psi_h^{\mathrm{Strang}}) = \frac{h}{2}A + \left( hB + \frac{h}{2}A + \frac{h^2}{4}[B,A] \right) + \frac{1}{2}\left[\frac{h}{2}A, hB + \frac{h}{2}A + \dots\right] + O(h^3)
+    $$
+    现在，我们只关心 $O(h)$ 和 $O(h^2)$ 的项：
+    - **$O(h)$ 项**:
+      $$
+      \frac{h}{2}A + hB + \frac{h}{2}A = h(A+B)
+      $$
+      这与精确解算子的指数中的一阶项完全一致。
+    - **$O(h^2)$ 项**:
+      来自 $C$ 的项是 $\frac{h^2}{4}[B,A]$。
+      来自对易子 $\frac{1}{2}[\frac{h}{2}A, C]$ 的主要贡献项是 $\frac{1}{2}[\frac{h}{2}A, hB] = \frac{h^2}{4}[A,B]$。
+      将这两项相加：
+      $$
+      \frac{h^2}{4}[B,A] + \frac{h^2}{4}[A,B] = \frac{h^2}{4}([B,A] + [A,B]) = 0
+      $$
+      因为对易子的性质是 $[A,B] = -[B,A]$。
 
-于是：
-$$
-\log(\Psi_h^{\mathrm{Strang}}) = h(A+B) + O(h^3)\quad\Rightarrow\quad \Psi_h^{\mathrm{Strang}} = e^{h(A+B)} + O(h^3)
-$$
-故局部误差 $O(h^3)$，全局误差 $O(h^2)$，即二阶。证毕。
+**结论**
+$O(h^2)$ 阶的误差项被完全消除了。因此，$\log(\Psi_h^{\mathrm{Strang}})$ 的展开式与 $h(A+B)$ 的差异从 $O(h^3)$ 阶才开始出现：
+$$\log(\Psi_h^{\mathrm{Strang}}) = h(A+B) + O(h^3)$$
+这意味着：
+$$\Psi_h^{\mathrm{Strang}} = e^{h(A+B) + O(h^3)} = e^{h(A+B)} + O(h^3)$$
+所以，Strang 分裂法的**局部截断误差**为 $O(h^3)$。在一个有限时间区间内积分时，总步数为 $T/h$，累积的**全局误差**为 $(T/h) \times O(h^3) = O(h^2)$。
+
+**证毕。**
 
 ### 3) 稳定性与可行性分析
 
