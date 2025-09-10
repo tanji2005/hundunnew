@@ -110,7 +110,7 @@ e^X e^Y = e^{X+Y + \tfrac{1}{2}[X,Y] + \tfrac{1}{12}[X,[X,Y]] - \tfrac{1}{12}[Y,
 $$
 当 $X,Y=O(h)$ 时，有（取对数）：
 $$
-\log(e^X e^Y) = X + Y + \tfrac{1}{2}[X,Y] + O(h^3)\,.
+\log(e^X e^Y) = X + Y + \tfrac{1}{2}[X,Y] + O(h^3)
 $$
 
 证明思路：将 $\Psi_h^{\mathrm{Strang}}=e^{\frac{h}{2}A}e^{hB}e^{\frac{h}{2}A}$ 写成单一指数 $e^Z$，与精确 $e^{h(A+B)}$ 对比。
@@ -118,13 +118,13 @@ $$
 1) 先合并后两项，令 $X=hB,\ Y=\tfrac{h}{2}A$：
 $$
 \log\bigl(e^{hB} e^{\frac{h}{2}A}\bigr) = hB + \tfrac{h}{2}A + \tfrac{1}{2}[hB, \tfrac{h}{2}A] + O(h^3)
- = hB + \tfrac{h}{2}A + \tfrac{h^2}{4}[B,A] + O(h^3)\,.
+ = hB + \tfrac{h}{2}A + \tfrac{h^2}{4}[B,A] + O(h^3)
 $$
 记该结果为 $C$，即 $e^C = e^{hB} e^{\frac{h}{2}A}$。
 
 2) 再与前一项合并：$\Psi_h^{\mathrm{Strang}}=e^{\frac{h}{2}A} e^C$，令 $X=\tfrac{h}{2}A,\ Y=C$：
 $$
-\log(\Psi_h^{\mathrm{Strang}})= \tfrac{h}{2}A + C + \tfrac{1}{2}[\tfrac{h}{2}A, C] + O(h^3)\,.
+\log(\Psi_h^{\mathrm{Strang}})= \tfrac{h}{2}A + C + \tfrac{1}{2}[\tfrac{h}{2}A, C] + O(h^3)
 $$
 
 3) 代入 $C$ 并收集同阶项：
@@ -133,7 +133,7 @@ $$
 
 于是：
 $$
-\log(\Psi_h^{\mathrm{Strang}}) = h(A+B) + O(h^3)\quad\Rightarrow\quad \Psi_h^{\mathrm{Strang}} = e^{h(A+B)} + O(h^3)\,.
+\log(\Psi_h^{\mathrm{Strang}}) = h(A+B) + O(h^3)\quad\Rightarrow\quad \Psi_h^{\mathrm{Strang}} = e^{h(A+B)} + O(h^3)
 $$
 故局部误差 $O(h^3)$，全局误差 $O(h^2)$，即二阶。证毕。
 
