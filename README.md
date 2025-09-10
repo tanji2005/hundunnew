@@ -132,32 +132,46 @@ $$\log(e^X e^Y) = X + Y + \frac{1}{2}[X,Y] + O(h^3)$$
     \log(\Psi_h^{\mathrm{Strang}}) = \left(\frac{h}{2}A\right) + C + \frac{1}{2}\left[\frac{h}{2}A, C\right] + O(h^3)
     $$
 
-3.  **代入 $C$ 并按 $h$ 的幂次收集项**
-    将 $C$ 的表达式代入上式：
-    $$
-    \log(\Psi_h^{\mathrm{Strang}}) = \frac{h}{2}A + \left( hB + \frac{h}{2}A + \frac{h^2}{4}[B,A] \right) + \frac{1}{2}\left[\frac{h}{2}A, hB + \frac{h}{2}A + \dots\right] + O(h^3)
-    $$
-    现在，我们只关心 $O(h)$ 和 $O(h^2)$ 的项：
-    - **$O(h)$ 项**:
-      $$
-      \frac{h}{2}A + hB + \frac{h}{2}A = h(A+B)
-      $$
-      这与精确解算子的指数中的一阶项完全一致。
-    - **$O(h^2)$ 项**:
-      来自 $C$ 的项是 $\frac{h^2}{4}[B,A]$。
-      来自对易子 $\frac{1}{2}[\frac{h}{2}A, C]$ 的主要贡献项是 $\frac{1}{2}[\frac{h}{2}A, hB] = \frac{h^2}{4}[A,B]$。
-      将这两项相加：
-      $$
-      \frac{h^2}{4}[B,A] + \frac{h^2}{4}[A,B] = \frac{h^2}{4}([B,A] + [A,B]) = 0
-      $$
-      因为对易子的性质是 $[A,B] = -[B,A]$。
+### 3) 代入 C 并按 h 的幂次收集项
 
-**结论**
-$O(h^2)$ 阶的误差项被完全消除了。因此，$\log(\Psi_h^{\mathrm{Strang}})$ 的展开式与 $h(A+B)$ 的差异从 $O(h^3)$ 阶才开始出现：
+首先，将算子 $C$ 的表达式代入到 $\log(\Psi_h^{\mathrm{Strang}})$ 的公式中：
+$$\log(\Psi_h^{\mathrm{Strang}}) = \frac{h}{2}A + C + \frac{1}{2}\left[\frac{h}{2}A, C\right] + O(h^3)$$
+代入 $C = hB + \frac{h}{2}A + \frac{h^2}{4}[B,A] + O(h^3)$，我们得到：
+$$\log(\Psi_h^{\mathrm{Strang}}) = \frac{h}{2}A + \left( hB + \frac{h}{2}A + \frac{h^2}{4}[B,A] \right) + \frac{1}{2}\left[\frac{h}{2}A, hB + \frac{h}{2}A + \dots\right] + O(h^3)$$
+现在，我们按 $h$ 的幂次来整理和分析各项。
+
+- #### $O(h)$ 阶项
+  只看与 $h$ 成正比的项：
+  $$
+  \frac{h}{2}A + hB + \frac{h}{2}A = h(A+B)
+  $$
+  这与精确解算子 $e^{h(A+B)}$ 的指数中的一阶项完全一致。
+
+- #### $O(h^2)$ 阶项
+  接下来，我们收集所有与 $h^2$ 成正比的项。这些项来自两个地方：
+  1.  来自 $C$ 表达式中的项：$\frac{h^2}{4}[B,A]$
+  2.  来自对易子 $\frac{1}{2}\left[\frac{h}{2}A, C\right]$。我们只需考虑 $C$ 中的最低阶项（$hB$），因为其他项会产生更高阶的贡献（$O(h^3)$ 或更高）。所以，这一部分的主要贡献是：
+      $$
+      \frac{1}{2}\left[\frac{h}{2}A, hB\right] = \frac{h^2}{4}[A,B]
+      $$
+  将这两个 $O(h^2)$ 的项相加：
+  $$
+  \frac{h^2}{4}[B,A] + \frac{h^2}{4}[A,B]
+  $$
+  利用对易子的反对称性质 $[A,B] = -[B,A]$，上式变为：
+  $$
+  \frac{h^2}{4}(- [A,B] + [A,B]) = 0
+  $$
+  可见，$O(h^2)$ 阶的误差项被完全抵消了。
+
+### 结论
+
+由于 $O(h^2)$ 项为零，$\log(\Psi_h^{\mathrm{Strang}})$ 的展开式与 $h(A+B)$ 的差异从 $O(h^3)$ 阶才开始出现：
 $$\log(\Psi_h^{\mathrm{Strang}}) = h(A+B) + O(h^3)$$
-这意味着：
-$$\Psi_h^{\mathrm{Strang}} = e^{h(A+B) + O(h^3)} = e^{h(A+B)} + O(h^3)$$
-所以，Strang 分裂法的**局部截断误差**为 $O(h^3)$。在一个有限时间区间内积分时，总步数为 $T/h$，累积的**全局误差**为 $(T/h) \times O(h^3) = O(h^2)$。
+这意味着 Strang 分裂算子与精确解算子之差为 $O(h^3)$：
+$$\Psi_h^{\mathrm{Strang}} = e^{h(A+B)} + O(h^3)$$
+因此，该方法的**局部截断误差**为 $O(h^3)$，**全局误差**为 $O(h^2)$。证毕。
+
 
 **证毕。**
 
