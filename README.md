@@ -52,6 +52,13 @@
 - 指标：在控制台输出 `|dx|_max, |dv|_max, RMS(dx), RMS(dv)`。
 - 图像：生成 `x(t)` 覆盖图、`v(t)` 覆盖图、差值 `dx(t)`、相图覆盖，便于直观比较。
 
+### 🖼️ 示例图（200s, h=5e-3, solve_ivp 对比）
+![Strang 相图与时序](assets/strang.png)
+
+![Full 相图与时序（solve_ivp）](assets/full_solve_ivp.png)
+
+![对比与差异图](assets/compare_solve_ivp.png)
+
 ## 🔧 参数建议
 - 选择 `h << 2π/ω`（约 5.34）以保证精度与稳定性。
 - 系统含驱动与阻尼，总能量不守恒；相图（x-v）更直观地反映长期行为。
